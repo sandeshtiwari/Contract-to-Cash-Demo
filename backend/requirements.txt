@@ -5,3 +5,4 @@ httpx==0.28.1
 openai>=2.37.0
 openai-agents>=0.17.2
 python-dotenv>=1.0.1
+synapsor>=0.1.1

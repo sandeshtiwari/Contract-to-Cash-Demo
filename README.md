@@ -19,7 +19,7 @@ The app starts:
 - Backend: `http://127.0.0.1:8017`
 - Frontend: `http://127.0.0.1:5177`
 
-The final walkthrough step runs the two LLM lanes through the OpenAI Agents SDK using `gpt-5-mini` by default. The demo loads `OPENAI_API_KEY` and the hosted Synapsor key from this project first, then from the existing `Expense Guard/backend/.env` file.
+The final walkthrough step runs the two LLM lanes through the OpenAI Agents SDK using `gpt-5-mini` by default. The demo loads `OPENAI_API_KEY` and the hosted Synapsor key from this project only.
 
 ## Hosted Synapsor
 
@@ -30,9 +30,18 @@ Expected environment:
 
 ```bash
 SYNAPSOR_URL=https://synapsor.ai
-SYNAPSOR_PROJECT_ID=expense_guard
-SYNAPSOR_DATABASE_ID=db_expense_guard_dev_1779605449
+SYNAPSOR_PROJECT_ID=contract_to_cash
+SYNAPSOR_DATABASE_ID=db_contract_to_cash_dev
 SYNAPSOR_SERVER_API_KEY=...
+```
+
+The backend uses the installed Synapsor Python package against the hosted runtime:
+
+```python
+from synapsor import Synapsor
+
+client = Synapsor("https://synapsor.ai", api_key="<synapsor_api_key>")
+print(client.query("SELECT 1;"))
 ```
 
 `POST /api/reset` drops any prior demo tables/capabilities in that hosted
