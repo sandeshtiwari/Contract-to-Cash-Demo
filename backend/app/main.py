@@ -48,7 +48,7 @@ def reset_demo_data() -> dict[str, str]:
         }
     return {
         "status": "seeded",
-        "message": "Remote Synapsor schema/capabilities and local visible run state were reset to seed data.",
+        "message": "Hosted Synapsor schema/capabilities and visible demo run state were reset to seed data.",
     }
 
 

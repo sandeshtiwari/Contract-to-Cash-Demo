@@ -23,7 +23,16 @@ The final walkthrough step runs the two LLM lanes through the OpenAI Agents SDK 
 
 ## Hosted Synapsor
 
-The Synapsor lane calls the hosted Synapsor runtime at `https://synapsor.ai`.
+The Synapsor lane is remote-only. It calls the hosted Synapsor runtime at `https://synapsor.ai` through the installed Synapsor Python SDK.
+
+The Postgres lanes are local comparison lanes. They show what the app has to own when Synapsor is not the database trust layer.
+
+Requirements for the Synapsor lane:
+
+- A Synapsor API key.
+- The Synapsor Python SDK installed in the backend environment.
+- A hosted Synapsor database/project available from `synapsor.ai`.
+
 The API key stays in `backend/.env`, which is ignored by git.
 
 Expected environment:
@@ -32,7 +41,7 @@ Expected environment:
 SYNAPSOR_URL=https://synapsor.ai
 SYNAPSOR_PROJECT_ID=contract_to_cash
 SYNAPSOR_DATABASE_ID=db_contract_to_cash_dev
-SYNAPSOR_SERVER_API_KEY=...
+SYNAPSOR_API_KEY=...
 ```
 
 The backend uses the installed Synapsor Python package against the hosted runtime:
@@ -44,11 +53,39 @@ client = Synapsor("https://synapsor.ai", api_key="<synapsor_api_key>")
 print(client.query("SELECT 1;"))
 ```
 
+Install the SDK in the backend environment if needed:
+
+```bash
+pip install synapsor
+```
+
 `POST /api/reset` drops any prior demo tables/capabilities in that hosted
 database scope, loads the Contract-to-Cash schema, inserts seed cases, builds
 hybrid indexes, and creates the Synapsor agent context/capabilities/settlement
 policy. If the hosted service is still resuming, the endpoint returns
 `remote_pending` and the UI can be retried after the runtime is available.
+
+## Demo Run Metrics
+
+These are representative metrics from the seeded demo flow. Token estimates come from the payloads this app sends to the LLM lanes; hosted runtime latency and live OpenAI usage can vary between runs.
+
+Main messy case, Acme overbilled upgrade plus missed service credit:
+
+| Lane | Input Tokens | Tool Calls | DB Trips | App Glue LOC | Branch Created | Replay |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| Synapsor + LLM | 1,532 | 2 | 2 | 54 | Yes | Yes |
+| Postgres + pgvector + LLM | 6,478 | 13 | 17 | 318 | No | No |
+| Postgres Rules Only | 0 | 0 | 4 | 142 | No | No |
+
+Clean renewal case, where deterministic logic can succeed:
+
+| Lane | Input Tokens | Tool Calls | DB Trips | App Glue LOC | Branch Created | Replay |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| Synapsor + LLM | 1,041 | 1 | 1 | 54 | No | Yes |
+| Postgres + pgvector + LLM | 5,282 | 10 | 12 | 318 | No | No |
+| Postgres Rules Only | 0 | 0 | 4 | 142 | No | No |
+
+For the Acme case, the seeded run shows Synapsor sending about 4,946 fewer input tokens than the Postgres + LLM lane, a 76.4% reduction in this demo payload. The exact numbers can vary if the seed data, prompt, model, or payload formatting changes.
 
 ## Lane Code Layout
 

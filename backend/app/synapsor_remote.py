@@ -29,7 +29,7 @@ class SynapsorRemoteStore:
 
     def db(self) -> Synapsor:
         if not self.settings.synapsor_api_key:
-            raise RuntimeError("SYNAPSOR_SERVER_API_KEY or SYNAPSOR_API_KEY is required")
+            raise RuntimeError("SYNAPSOR_API_KEY is required for the hosted Synapsor demo")
         with self._lock:
             if self._client is None:
                 self._client = Synapsor(
